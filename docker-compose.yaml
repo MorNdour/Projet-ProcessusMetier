@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -8,3 +10,50 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+
+  redis:
+    image: "redis"
+    ports:
+      - "6379:6379"
+
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: loan_db
+    ports:
+      - "5432:5432"
+
+  loan_service:
+    build: ./services/loan_service
+    ports:
+      - "8001:8000"
+    depends_on:
+      - rabbitmq
+
+  credit_service:
+    build: ./services/credit_service
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+  property_service:
+    build: ./services/property_service
+    depends_on:
+      - rabbitmq
+      - redis
+
+  decision_service:
+    build: ./services/decision_service
+    depends_on:
+      - rabbitmq
+
+  notification_service:
+    build: ./services/notification_service
+    ports:
+      - "8005:8000"
+    depends_on:
+      - rabbitmq

@@ -1,0 +1,10 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "MYNEWLONGSECURECOOKIE12345"
+    volumes:
+      - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    ports:
+      - "5672:5672"
+      - "15672:15672"

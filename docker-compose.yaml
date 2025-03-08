@@ -40,11 +40,23 @@ services:
     environment:
       - RABBITMQ_HOST=rabbitmq
 
-  property_service:
-    build: ./services/property_service
+  verification-credit-service:
+    build: ./services/verification-credit-service
     depends_on:
       - rabbitmq
       - redis
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+  property_celery_worker:
+    build: ./services/verification-credit-service
+    command: celery -A tasks worker --loglevel=info
+    depends_on:
+      - rabbitmq
+      - redis
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
 
   decision_service:
     build: ./services/decision_service

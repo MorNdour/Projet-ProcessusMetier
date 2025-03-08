@@ -1,9 +1,10 @@
 import logging
 logging.basicConfig (level = logging.DEBUG) 
 import pika
+import json
 
 class VerificationCompletudeDemande:
-    def __init__(self, host="localhost", s_queue="verification-completude", d1_queue="dossier-complet",d2_queue="dossier-incomplet"):
+    def __init__(self, host="host.docker.internal", s_queue="verification-completude", d1_queue="dossier-complet",d2_queue="dossier-incomplet"):
         """
         Initialise le processeur RabbitMQ.
         :param host: Adresse du serveur RabbitMQ
@@ -20,7 +21,7 @@ class VerificationCompletudeDemande:
 
     def connect(self):
         """ Établit la connexion avec RabbitMQ et déclare les queues. """
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host,port=5672))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.s_queue, durable=True)
         self.channel.queue_declare(queue=self.d1_queue, durable=True)
@@ -28,18 +29,19 @@ class VerificationCompletudeDemande:
 
     def completude_verification(self, body):
         """ Traitement du message (modifie ici si besoin) """
-        message = body.decode()  # Convertit les données en texte
-        dossier_complet = any(value in (None, "", " ") for value in message.values())
+        message = json.loads(body.decode())  # Convertit les données en texte
+        dossier_complet = any(value in (None, "", " ","Null") for value in message.values())
         if dossier_complet:
-            self.publish_message(message,self.d1_queue)
-        else:
             self.publish_message(message,self.d2_queue)
+        else:
+            self.publish_message(message,self.d1_queue)
       
 
     def publish_message(self, message,queue):
         """ Publie un message dans la queue de destination """
+        message_bytes = json.dumps(message).encode('utf-8')
         self.channel.basic_publish(
-            exchange="", routing_key=queue, body=message
+            exchange="", routing_key=queue, body=message_bytes
         )
         print(f"Message publié : {message} dans {queue}")
 
@@ -65,7 +67,7 @@ class VerificationCompletudeDemande:
 
 # Exécution
 if __name__ == "__main__":
-    processor = VerificationCompletudeDemande(host="localhost", s_queue="s_queue", d1_queue="dossier-complet", d2_queue="dossier-incomplet")
+    processor = VerificationCompletudeDemande(host="host.docker.internal", s_queue="verification-completude", d1_queue="dossier-complet", d2_queue="dossier-incomplet")
     try:
         processor.start_processing()
     except KeyboardInterrupt:

@@ -1,0 +1,6 @@
+fastapi 
+pydantic 
+typing_extensions 
+uvicorn
+pika
+requests

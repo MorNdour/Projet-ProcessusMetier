@@ -17,7 +17,7 @@ QUEUE_OUTPUT = "property_evaluation_result"  # Résultats de l’évaluation
 
 def consume_messages():
     """Écoute la file d'attente et lance l’évaluation du bien immobilier"""
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST,port=5672))
     channel = connection.channel()
 
     channel.queue_declare(queue=QUEUE_INPUT, durable=True)

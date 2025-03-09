@@ -41,7 +41,44 @@ services:
       - "8001:8000"
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
+    restart: unless-stopped
+
+  verification-completude-service:
+    build: ./verification-completude-service
+    container_name: verification_completude_service
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    restart: unless-stopped
+
+  completer-dossier-service:
+    build: ./completer-dossier
+    container_name: completer_dossier_service
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+      smtp_server:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - SMTP_HOST=smtp_server
+      - SMTP_PORT=1025
+    restart: unless-stopped
+
+  smtp_server:
+    image: python:3.10
+    container_name: smtp_server
+    command: >
+      sh -c "pip install aiosmtpd && python -m aiosmtpd --listen 0.0.0.0:1025 --debug"
+    ports:
+      - "1025:1025"
     restart: unless-stopped
 
 
@@ -67,6 +104,20 @@ services:
         condition: service_started
     environment:
       - RABBITMQ_HOST=rabbitmq
+    restart: unless-stopped
+
+  property_celery_worker:
+    build: ./verification-credit-service
+    container_name: property_celery_worker
+    command: celery -A tasks worker --loglevel=info
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
     restart: unless-stopped
 
   decision_service:

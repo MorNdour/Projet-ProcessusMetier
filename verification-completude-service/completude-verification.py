@@ -4,7 +4,7 @@ import pika
 import json
 
 class VerificationCompletudeDemande:
-    def __init__(self, host="host.docker.internal", s_queue="verification-completude", d1_queue="dossier-complet",d2_queue="dossier-incomplet"):
+    def __init__(self, host="rabbitmq", s_queue="verification-completude", d1_queue="dossier-complet",d2_queue="dossier-incomplet"):
         """
         Initialise le processeur RabbitMQ.
         :param host: Adresse du serveur RabbitMQ
@@ -67,7 +67,7 @@ class VerificationCompletudeDemande:
 
 # Exécution
 if __name__ == "__main__":
-    processor = VerificationCompletudeDemande(host="host.docker.internal", s_queue="verification-completude", d1_queue="dossier-complet", d2_queue="dossier-incomplet")
+    processor = VerificationCompletudeDemande(host="rabbitmq", s_queue="verification-completude", d1_queue="dossier-complet", d2_queue="dossier-incomplet")
     try:
         processor.start_processing()
     except KeyboardInterrupt:

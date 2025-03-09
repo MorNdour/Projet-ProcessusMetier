@@ -12,7 +12,7 @@ QUEUE_REJECTED = "loan_rejected"
 
 def connect_rabbitmq():
     """ Établit la connexion avec RabbitMQ """
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST,port=5672))
     channel = connection.channel()
     channel.queue_declare(queue=QUEUE_REJECTED, durable=True)
     return connection, channel

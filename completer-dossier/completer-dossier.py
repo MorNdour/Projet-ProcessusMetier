@@ -5,9 +5,13 @@ import json
 import smtplib
 # Import the email modules we'll need
 from email.message import EmailMessage
+import os
+
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp_server")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 1025))
 
 class CompletuterDossier:
-    def __init__(self, host="host.docker.internal", queue="dossier-incomplet"):
+    def __init__(self, host="rabbitmq", queue="dossier-incomplet"):
         """
         Initialise le processeur RabbitMQ.
         :param host: Adresse du serveur RabbitMQ
@@ -35,7 +39,7 @@ class CompletuterDossier:
         msg['From'] = "monmail@gmail.com"
         msg['To'] = mail
         # Send the message via our own SMTP server.
-        s = smtplib.SMTP('host.docker.internal',1025)
+        s = smtplib.SMTP(SMTP_HOST,SMTP_PORT)
         s.send_message(msg)
         s.quit()
         print("Mail envoye")
@@ -63,7 +67,7 @@ class CompletuterDossier:
 
 # Exécution
 if __name__ == "__main__":
-    processor = CompletuterDossier(host="host.docker.internal", queue="dossier-incomplet")
+    processor = CompletuterDossier(host="rabbitmq", queue="dossier-incomplet")
     try:
         processor.start_processing()
     except KeyboardInterrupt:

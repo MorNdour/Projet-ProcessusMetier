@@ -22,7 +22,7 @@ class DemandeData(BaseModel):
 
 def publie_dans_queue_verification_completude(dossier_client):
     queue_name = 'verification-completude'
-    host_name='host.docker.internal'
+    host_name="rabbitmq"
     # Paramètres de connexion à RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host_name, port=5672))
     channel = connection.channel()

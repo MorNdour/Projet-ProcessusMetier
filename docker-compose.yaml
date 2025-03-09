@@ -4,12 +4,14 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     environment:
-      RABBITMQ_ERLANG_COOKIE: "MYNEWLONGSECURECOOKIE12345"
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     volumes:
-      - ./erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+      - rabbitmq_data:/var/lib/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    restart: unless-stopped
 
   redis:
     image: "redis"
@@ -26,22 +28,15 @@ services:
       - "5432:5432"
 
   loan_service:
-    build: ./services/loan_service
+    build: ./demande-pret-service
     ports:
       - "8001:8000"
     depends_on:
       - rabbitmq
 
-  credit_service:
-    build: ./services/credit_service
-    depends_on:
-      - rabbitmq
-      - redis
-    environment:
-      - RABBITMQ_HOST=rabbitmq
 
   verification-credit-service:
-    build: ./services/verification-credit-service
+    build: ./verification-credit-service
     depends_on:
       - rabbitmq
       - redis
@@ -49,7 +44,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
 
   property_celery_worker:
-    build: ./services/verification-credit-service
+    build: ./verification-credit-service
     command: celery -A tasks worker --loglevel=info
     depends_on:
       - rabbitmq
@@ -59,13 +54,19 @@ services:
       - REDIS_HOST=redis
 
   decision_service:
-    build: ./services/decision_service
+    build: ./decision-service
     depends_on:
       - rabbitmq
 
-  notification_service:
-    build: ./services/notification_service
-    ports:
-      - "8005:8000"
+  eligibility_service:
+    build: ./eligibilite-service
     depends_on:
       - rabbitmq
+
+  rejection_service:
+    build: ./rejet-service
+    depends_on:
+      - rabbitmq
+
+volumes:
+  rabbitmq_data:

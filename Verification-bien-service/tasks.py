@@ -26,3 +26,6 @@ def property_evaluation(propriete_reference, type_de_la_propriete):
 
     logging.info(f" [✔] Résultat de l’évaluation: {result}")
     return result
+
+
+

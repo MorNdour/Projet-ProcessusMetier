@@ -69,20 +69,6 @@ services:
       - RABBITMQ_HOST=rabbitmq
     restart: unless-stopped
 
-  property_celery_worker:
-    build: ./verification-credit-service
-    container_name: property_celery_worker
-    command: celery -A tasks worker --loglevel=info
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - REDIS_HOST=redis
-    restart: unless-stopped
-
   decision_service:
     build: ./decision-service
     container_name: decision_service
@@ -119,3 +105,45 @@ services:
       - rabbitmq
     environment:
       - RABBITMQ_HOST=rabbitmq
+
+
+
+  verification_bien_worker:
+    build: ./Verification-bien-service
+    container_name: verification_bien_worker
+    command: celery -A tasks worker --loglevel=info
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+    restart: unless-stopped
+
+  verification_credit_worker:
+    build: ./verification-credit-service
+    container_name: verification_credit_worker
+    command: celery -A tasks worker --loglevel=info
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+    restart: unless-stopped
+
+
+  flower:
+    image: mher/flower
+    container_name: flower
+    command: [ "celery", "-A", "tasks", "flower", "--port=5555" ]
+    depends_on:
+      - property_celery_worker
+      - verification_bien_worker
+      - verification_credit_worker
+    ports:
+      - "5555:5555"

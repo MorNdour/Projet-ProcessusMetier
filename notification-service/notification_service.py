@@ -76,3 +76,12 @@ async def sse_notifications():
 
 # Lancer le consommateur RabbitMQ en arrière-plan
 threading.Thread(target=consume_notifications, daemon=True).start()
+
+
+
+
+
+
+
+
+

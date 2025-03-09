@@ -71,6 +71,40 @@ services:
       - SMTP_HOST=smtp_server
       - SMTP_PORT=1025
     restart: unless-stopped
+  
+  envoyer-accord-rembourchement:
+    build: ./envoyer-accord-rembourchement
+    container_name: envoyer-accord-rembourchement
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+      smtp_server:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - SMTP_HOST=smtp_server
+      - SMTP_PORT=1025
+    restart: unless-stopped
+
+  recevoir-accord-signer:
+    build: ./recevoir-accord-signer
+    container_name: recevoir-accord-signer
+    ports:
+      - "8001:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+      smtp_server:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - SMTP_HOST=smtp_server
+      - SMTP_PORT=1025
+    restart: unless-stopped
 
   smtp_server:
     image: python:3.10
@@ -87,7 +121,7 @@ services:
     container_name: verification_bien_service
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     environment:
@@ -151,7 +185,7 @@ services:
   notification_service:
     build: ./notification-service
     ports:
-      - "8003:8000"
+      - "8004:8000"
     depends_on:
       - rabbitmq
     environment:

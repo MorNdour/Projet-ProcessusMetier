@@ -11,8 +11,8 @@ COPY . /app
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Exposition du port pour l'API FastAPI
-EXPOSE 8004
+# Exposition du port (à adapter selon ton besoin)
+EXPOSE 8005
 
 # Commande pour lancer l'application
-CMD ["python", "notification_service.py"]
+CMD ["python3", "envoyer-accord.py"]

@@ -22,7 +22,7 @@ QUEUES = ["loan_decision", "dossier-complet", "dossier-incomplet", "rejet_demand
 
 def connect_rabbitmq():
     """Connexion à RabbitMQ et déclaration des files."""
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST,port=5672))
     channel = connection.channel()
     for queue in QUEUES:
         channel.queue_declare(queue=queue, durable=True)

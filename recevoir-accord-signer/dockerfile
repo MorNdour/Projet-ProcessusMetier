@@ -11,8 +11,8 @@ COPY . /app
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Exposition du port pour l'API FastAPI
-EXPOSE 8004
+# Exposition du port (à adapter selon ton besoin)
+EXPOSE 8006
 
 # Commande pour lancer l'application
-CMD ["python", "notification_service.py"]
+CMD ["uvicorn", "recevoir-accord:app", "--host", "0.0.0.0", "--port", "8006"]

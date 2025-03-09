@@ -3,70 +3,97 @@ version: '3.8'
 services:
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      RABBITMQ_ERLANG_COOKIE: "MYNEWLONGSECURECOOKIE12345"
     ports:
       - "5672:5672"
       - "15672:15672"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: "redis"
+    image: redis
+    container_name: redis
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
   db:
-    image: "postgres"
+    image: postgres
+    container_name: postgres
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: loan_db
     ports:
       - "5432:5432"
+    restart: unless-stopped
 
   loan_service:
     build: ./demande-pret-service
+    container_name: loan_service
     ports:
       - "8001:8000"
     depends_on:
-      - rabbitmq
-
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
 
   verification-credit-service:
     build: ./verification-credit-service
+    container_name: verification_credit_service
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - RABBITMQ_HOST=rabbitmq
+    restart: unless-stopped
 
   property_celery_worker:
     build: ./verification-credit-service
+    container_name: property_celery_worker
     command: celery -A tasks worker --loglevel=info
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - RABBITMQ_HOST=rabbitmq
       - REDIS_HOST=redis
+    restart: unless-stopped
 
   decision_service:
     build: ./decision-service
+    container_name: decision_service
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
 
   eligibility_service:
     build: ./eligibilite-service
+    container_name: eligibility_service
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
 
   rejection_service:
     build: ./rejet-service
+    container_name: rejection_service
     depends_on:
-      - rabbitmq
-
-volumes:
-  rabbitmq_data:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "8003:8000"

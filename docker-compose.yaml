@@ -92,7 +92,7 @@ services:
     build: ./recevoir-accord-signer
     container_name: recevoir-accord-signer
     ports:
-      - "8001:8000"
+      - "8006:8006"
     depends_on:
       rabbitmq:
         condition: service_started

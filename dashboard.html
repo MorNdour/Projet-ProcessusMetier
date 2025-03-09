@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Notifications</title>
+</head>
+<body>
+    <h1>Statut des demandes</h1>
+    <ul id="notifications"></ul>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8003/ws");
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const li = document.createElement("li");
+            li.textContent = `Client ${data.client_id} : ${data.decision}`;
+            document.getElementById("notifications").appendChild(li);
+        };
+    </script>
+</body>
+</html>

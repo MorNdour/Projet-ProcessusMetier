@@ -110,3 +110,12 @@ services:
     restart: unless-stopped
     ports:
       - "8003:8000"
+
+  notification_service:
+    build: ./notification-service
+    ports:
+      - "8003:8000"
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq

@@ -1,12 +1,9 @@
 import logging
 import json
 import pika
-from fastapi import FastAPI
 
 # Configuration des logs
 logging.basicConfig(level=logging.INFO)
-
-app = FastAPI()
 
 # Connexion à RabbitMQ
 RABBITMQ_HOST = "rabbitmq"
@@ -21,27 +18,27 @@ def connect_rabbitmq():
     return connection, channel
 
 
-def rejection_callback(ch, method, properties, body):
-    """ Écoute les refus et envoie une notification """
-    data = json.loads(body)
-    client_id = data["client_id"]
+def publish_rejection(client_id, credit_score, property_value):
+    """ Publie un rejet de prêt dans RabbitMQ """
+    message = {
+        "client_id": client_id,
+        "credit_score": credit_score,
+        "property_value": property_value,
+        "status": "rejected"
+    }
 
-    logging.info(
-        f" [❌] Prêt REFUSÉ pour {client_id} - Score crédit: {data['credit_score']}, Valeur bien: {data['property_value']}")
-
-    # Simuler l’envoi d’un email de rejet (peut être intégré avec un vrai service mail)
-    print(f"📩 Notification envoyée à {client_id}: Votre prêt a été refusé.")
-
-
-def consume_messages():
-    """ Écoute la file `loan_rejected` """
     connection, channel = connect_rabbitmq()
-    channel.basic_consume(queue=QUEUE_REJECTED, on_message_callback=rejection_callback, auto_ack=True)
-    logging.info(f" [✔] En attente des décisions de refus...")
-    channel.start_consuming()
+    channel.basic_publish(
+        exchange="",
+        routing_key=QUEUE_REJECTED,
+        body=json.dumps(message),
+        properties=pika.BasicProperties(
+            delivery_mode=2  # Persistance des messages
+        )
+    )
+    connection.close()
+
+    logging.info(f" [❌] Prêt refusé pour {client_id}, publié dans {QUEUE_REJECTED}.")
 
 
-# Lancer la consommation des messages en arrière-plan
-import threading
 
-threading.Thread(target=consume_messages, daemon=True).start()

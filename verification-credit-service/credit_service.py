@@ -22,7 +22,7 @@ def consume_messages():
 
     while True:  # Boucle pour assurer la reconnexion en cas d'erreur
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST,port=5672))
             channel = connection.channel()
 
             channel.queue_declare(queue=QUEUE_INPUT, durable=True)

@@ -26,7 +26,7 @@ pending_decisions = {}
 
 def connect_rabbitmq():
     """ Établit la connexion avec RabbitMQ """
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST,port=5672))
     channel = connection.channel()
 
     # Déclaration des files

@@ -44,6 +44,19 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+
+  verification-bien-service:
+    build: ./Verification-bien-service
+    container_name: verification_bien_service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    restart: unless-stopped
+
   verification-credit-service:
     build: ./verification-credit-service
     container_name: verification_credit_service

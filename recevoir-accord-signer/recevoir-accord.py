@@ -17,13 +17,6 @@ class Accord(BaseModel):
 
 class VerificationAccord:
     def __init__(self, host="rabbitmq", d1_queue="accord-accepter",d2_queue="accord-rejeter"):
-        """
-        Initialise le processeur RabbitMQ.
-        :param host: Adresse du serveur RabbitMQ
-        :param s_queue: Queue où écouter les messages
-        :param d1_queue: Queue où publier les messages dans la file dossier complet
-        :param d2_queue: Queue où publier les messages dans la file dossier incomplet
-        """
         self.host = host
         self.d1_queue = d1_queue
         self.d2_queue = d2_queue

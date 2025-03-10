@@ -5,4 +5,4 @@ celery
 redis
 requests
 pydantic
-flowere
+# flowere

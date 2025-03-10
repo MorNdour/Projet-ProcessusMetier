@@ -133,7 +133,7 @@ services:
     container_name: verification_credit_service
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     environment:
@@ -146,7 +146,7 @@ services:
     command: celery -A tasks worker --loglevel=info
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     environment:
@@ -159,7 +159,7 @@ services:
     container_name: decision_service
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
   eligibility_service:
@@ -167,7 +167,7 @@ services:
     container_name: eligibility_service
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     ports:
       - "8002:8000"
@@ -177,7 +177,7 @@ services:
     container_name: rejection_service
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     ports:
       - "8003:8000"
@@ -191,15 +191,13 @@ services:
     environment:
       - RABBITMQ_HOST=rabbitmq
 
-
-
   verification_bien_worker:
     build: ./Verification-bien-service
     container_name: verification_bien_worker
     command: celery -A tasks worker --loglevel=info
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     environment:
@@ -213,14 +211,13 @@ services:
     command: celery -A tasks worker --loglevel=info
     depends_on:
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     environment:
       - RABBITMQ_HOST=rabbitmq
       - REDIS_HOST=redis
     restart: unless-stopped
-
 
   flower:
     image: mher/flower
